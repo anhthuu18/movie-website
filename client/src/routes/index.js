@@ -2,14 +2,12 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 
 // Import pages
-import Home from '../pages/Home';
-import Movies from '../pages/Movies';
-import MovieDetail from '../pages/MovieDetail';
-import Login from '../pages/Auth/Login';
-import Register from '../pages/Auth/Register';
-import Profile from '../pages/Profile';
-import WatchList from '../pages/WatchList';
-import NotFound from '../pages/NotFound';
+import Home from '~/pages/Home';
+import MovieDetail from '~/pages/MovieDetail';
+import Login from '~/pages/Auth/Login';
+import Register from '~/pages/Auth/Register';
+import Profile from '~/pages/Profile';
+import WatchList from '~/pages/WatchList';
 
 // PrivateRoute HOC
 const PrivateRoute = ({ children }) => {
@@ -40,7 +38,6 @@ const PublicRoute = ({ children }) => {
 // Route paths constant
 export const ROUTES = {
   HOME: '/',
-  MOVIES: '/movies',
   MOVIE_DETAIL: '/movie/:id',
   LOGIN: '/login',
   REGISTER: '/register',
@@ -57,7 +54,6 @@ const AppRoutes = () => {
     <Routes>
       {/* Public Routes */}
       <Route path={ROUTES.HOME} element={<Home />} />
-      <Route path={ROUTES.MOVIES} element={<Movies />} />
       <Route path={ROUTES.MOVIE_DETAIL} element={<MovieDetail />} />
       
       {/* Auth Routes */}
@@ -97,7 +93,6 @@ const AppRoutes = () => {
       />
 
       {/* 404 Route */}
-      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 };

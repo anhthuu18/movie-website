@@ -2,20 +2,20 @@ import { BrowserRouter } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import store from '~/store';
 import AppRoutes from '~/routes';
-import Header from '~/components/Layout/Header';
-import Footer from '~/components/Layout/Footer';
+import Header from './components/layout/Header';
+import Footer from './components/layout/Footer';
 
 function App() {
   return (
     <Provider store={store}>
       <BrowserRouter>
+      <Header/>
         <div className="app">
-          <Header />
           <main className="main-content">
             <AppRoutes />
           </main>
-          <Footer />
         </div>
+        <Footer/>
       </BrowserRouter>
     </Provider>
   );
