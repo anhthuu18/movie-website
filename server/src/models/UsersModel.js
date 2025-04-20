@@ -15,10 +15,6 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    fullName: {
-        type: String,
-        required: true,
-    },
     image: {
         type: String,
         default: "",
@@ -28,15 +24,11 @@ const userSchema = new mongoose.Schema({
         enum: ["admin", "user"],
         default: "user",
     },
-    // searchHistory: {
-    //     type: [String],
-    //     default: [],
-    // },
-    createdAt: {
-        type: Date,
-        default: Date.now,
+    searchHistory: {
+        type: [String],
+        default: [],
     },
-    updatedAt: {
+    createdAt: {
         type: Date,
         default: Date.now,
     },
