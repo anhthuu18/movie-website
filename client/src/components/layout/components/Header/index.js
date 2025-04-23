@@ -2,7 +2,7 @@ import classNames from "classnames/bind";
 import styles from './Header.module.scss';
 import images from '~/assets/images';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCaretDown, faDownload, faSearch } from "@fortawesome/free-solid-svg-icons";
+import { faCaretDown,  faSearch } from "@fortawesome/free-solid-svg-icons";
 import { Link } from "react-router-dom";
 import { faUser } from "@fortawesome/free-regular-svg-icons";
 
@@ -15,10 +15,10 @@ function Header() {
                     <img src={images.logo} alt="Logo" />
                 </div>
                 <div className={cx('search')}>
-                    <FontAwesomeIcon icon={faSearch} />
+                    <FontAwesomeIcon icon={faSearch} className={cx('search-icon')}/>
                     <input type="text" placeholder="Tìm kiếm phim, diễn viên" className={cx('search-input')} />
                 </div>
-                <nav className={cx('main-menu')}>
+                <div className={cx('main-menu')}>
                     <ul className={cx('menu-list')}>
                         <li className={cx('menu-item')}>
                             <Link to="/chu-de" className={cx('menu-link')}>Chủ Đề</Link>
@@ -33,8 +33,8 @@ function Header() {
                             <Link to="/phim-bo" className={cx('menu-link')}>Phim Bộ</Link>
                         </li>
                         <li className={cx('menu-item')}>
-                            <Link to="/quoc-gia" className={cx('menu-link')}>Quốc gia</Link>
-                            <FontAwesomeIcon icon={faCaretDown}/>
+                            <button className={cx('menu-link')}>Quốc gia</button>
+                            <FontAwesomeIcon icon={faCaretDown} className={cx('dropdown-icon')}/>
                         </li>
                         <li className={cx('menu-item')}>
                             <Link to="/dien-vien" className={cx('menu-link')}>Diễn Viên</Link>
@@ -44,8 +44,8 @@ function Header() {
                         </li>
                     </ul>
                     <div className={cx('download')}>
-                        <FontAwesomeIcon icon={faDownload} />
-                        <div>
+                        <img src={images.download} alt="Download" className={cx('download-icon')} />
+                        <div className={cx('download-text')}>
                             <span>Tải ứng dụng</span>
                             <span>RoPhim</span>
                         </div>
@@ -56,7 +56,7 @@ function Header() {
                             <span>Thành viên</span>
                         </button>
                     </div>
-                </nav>
+                </div>
             </div>
         </div>
     );

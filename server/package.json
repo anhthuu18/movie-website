@@ -16,6 +16,7 @@
   "license": "ISC",
   "dependencies": {
     "@firebase/storage": "^0.13.7",
+    "axios": "^1.8.4",
     "bcryptjs": "^2.4.3",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",

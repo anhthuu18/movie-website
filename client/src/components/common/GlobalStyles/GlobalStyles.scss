@@ -5,11 +5,12 @@
   --primary-color-hover: #FFDE8A;
   --header-footer-bg: #0F111A;
   --bg-color: #191B24;
+  --text-light-color: #ffffff;
   --text-muted: #aaa;
   --border-color: #ffffff10;
 
   //Layout
-  --header-height: 70px;
+  --default-layout-header-height: 70px;
 
   //DefaultLayout
   // --default-layout-header-width: 1520px;
@@ -54,7 +55,7 @@ input,
 }
 
 a[href] {
-  color: var(--text-color);
+  color: black;
   text-decoration: none;
 }
 
