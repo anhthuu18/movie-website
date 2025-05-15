@@ -12,6 +12,9 @@ router.get("/trash", MovieController.getDeletedMovies);
 // [POST] /api/v1/movie/create - Tạo phim mới
 router.post("/create", MovieController.createMovie);
 
+// [PUT] /api/v1/movie/update/:id - Cập nhật thông tin phim
+router.put("/update/:id", MovieController.updateMovie);
+
 // [PATCH] /api/v1/movie/restore/:id - Khôi phục phim đã xóa
 router.patch("/restore/:id", MovieController.restoreMovie);
 

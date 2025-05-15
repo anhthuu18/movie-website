@@ -150,6 +150,41 @@ class MovieController {
       });
     }
   }
+
+  // [PUT] /api/v1/movie/update/:id
+  async updateMovie(req, res) {
+    try {
+      const { id } = req.params;
+      const updateData = req.body;
+      
+      if (!id) {
+        return res.status(400).json({
+          success: false,
+          message: "Movie ID is required"
+        });
+      }
+
+      // Validate update data với isUpdate = true
+      const errors = MovieService.validateMovieData(updateData, true);
+      if (errors.length > 0) {
+        return res.status(400).json({
+          success: false,
+          message: "Validation failed",
+          errors
+        });
+      }
+
+      const result = await MovieService.updateMovie(id, updateData);
+      res.status(200).json(result);
+    } catch (error) {
+      console.error("Error in updateMovie controller:", error);
+      res.status(error.message.includes("not found") ? 404 : 500).json({
+        success: false,
+        message: error.message || "Internal server error",
+        error: process.env.NODE_ENV === "development" ? error.stack : undefined
+      });
+    }
+  }
 }
 
 export default new MovieController();

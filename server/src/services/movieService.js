@@ -2,24 +2,41 @@ import { Movie } from "../models/Movie.js";
 import { MovieType } from "../models/MovieTypes.js";
 
 class MovieService {
-  validateMovieData(movieData) {
+  validateMovieData(movieData = {}, isUpdate = false) {
     const errors = [];
-    // Required fields
-    if (!movieData.title) {
-      errors.push("Title is required");
-    } else if (movieData.title.length > 200) {
+
+    // Kiểm tra movieData có tồn tại không
+    if (!movieData || typeof movieData !== 'object') {
+      return ["Invalid movie data"];
+    }
+
+    // Nếu là update, chỉ validate các trường được gửi lên
+    if (!isUpdate) {
+      // Validate required fields khi tạo mới
+      if (!movieData.title?.trim()) {
+        errors.push("Title is required");
+      }
+      if (!movieData.description?.trim()) {
+        errors.push("Description is required");
+      }
+      if (!movieData.releaseYear) {
+        errors.push("Release year is required");
+      }
+      if (!movieData.duration) {
+        errors.push("Duration is required");
+      }
+    }
+
+    // Validate các trường nếu chúng được gửi lên
+    if (movieData.title && movieData.title.trim().length > 200) {
       errors.push("Title must be less than 200 characters");
     }
 
-    if (!movieData.description) {
-      errors.push("Description is required");
-    } else if (movieData.description.length > 2000) {
+    if (movieData.description && movieData.description.trim().length > 2000) {
       errors.push("Description must be less than 2000 characters");
     }
 
-    if (!movieData.releaseYear) {
-      errors.push("Release year is required");
-    } else {
+    if (movieData.releaseYear !== undefined) {
       const year = parseInt(movieData.releaseYear);
       const currentYear = new Date().getFullYear();
       if (isNaN(year) || year < 1800 || year > currentYear + 5) {
@@ -27,9 +44,7 @@ class MovieService {
       }
     }
 
-    if (!movieData.duration) {
-      errors.push("Duration is required");
-    } else {
+    if (movieData.duration !== undefined) {
       const duration = parseInt(movieData.duration);
       if (isNaN(duration) || duration <= 0 || duration > 1000) {
         errors.push("Duration must be between 1 and 1000 minutes");
@@ -218,6 +233,30 @@ class MovieService {
     } catch (error) {
       console.error("Error in getDeletedMovies service:", error);
       throw new Error(error.message || "Error fetching deleted movies");
+    }
+  }
+
+  async updateMovie(id, updateData) {
+    try {
+      // Tìm movie trước khi update
+      const movie = await Movie.findOne({ movieId: id });
+      
+      if (!movie) {
+        throw new Error("Movie not found");
+      }
+
+      // Cập nhật thông tin movie
+      Object.assign(movie, updateData);
+      await movie.save();
+
+      return {
+        success: true,
+        message: "Movie updated successfully",
+        data: movie
+      };
+    } catch (error) {
+      console.error("Error in updateMovie service:", error);
+      throw new Error(error.message || "Error updating movie");
     }
   }
 }
