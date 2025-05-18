@@ -1,7 +1,9 @@
+import MovieBanner from "~/components/layout/components/Movies/MovieBanner";
+
 const Home = () => {
   return (
     <div>
-      <h1>Home Page</h1>
+      <MovieBanner />
     </div>
   );
 };

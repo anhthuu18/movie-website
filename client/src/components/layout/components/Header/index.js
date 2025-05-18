@@ -6,6 +6,7 @@ import { faSearch } from "@fortawesome/free-solid-svg-icons";
 import { Link } from "react-router-dom";
 import { faUser } from "@fortawesome/free-regular-svg-icons";
 import Dropdown from "~/components/Dropdown";
+import { useEffect, useState } from "react";
 
 const cx = classNames.bind(styles);
 
@@ -83,8 +84,22 @@ const genreItems = [
 ];
 
 function Header() {
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 50);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   return (
-    <div className={cx("wrapper")}>
+    <div className={cx("wrapper", {
+      transparent: !isScrolled,
+      scrolled: isScrolled
+    })}>
       <div className={cx("inner")}>
         <div className={cx("logo")}>
           <img src={images.logo1} alt="Logo" />

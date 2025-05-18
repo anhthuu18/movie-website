@@ -8,9 +8,11 @@
   --text-light-color: #ffffff;
   --text-muted: #aaa;
   --border-color: #ffffff10;
+  --primary-button-text: #191B24;
 
   //Layout
   --default-layout-header-height: 70px;
+  --default-layout-footer-height: 392px;
 
   //DefaultLayout
   // --default-layout-header-width: 1520px;
@@ -41,6 +43,7 @@ body {
   font-weight: 300;
   color: var(--text-dark-color);
   background-color: var(--body-background);
+  min-height: 100vh;
   overflow-x: hidden; //tránh thanh cuộn ngang
 }
 
@@ -55,7 +58,6 @@ input,
 }
 
 a[href] {
-  color: black;
   text-decoration: none;
 }
 
