@@ -41,10 +41,10 @@ body {
   font-size: 1.4rem;
   line-height: 1.5;
   font-weight: 300;
-  color: var(--text-dark-color);
-  background-color: var(--body-background);
+  color: var(--text-light-color);
+  background-color: var(--bg-color);
   min-height: 100vh;
-  overflow-x: hidden; //tránh thanh cuộn ngang
+  overflow-x: hidden;
 }
 
 /* Responsive */
