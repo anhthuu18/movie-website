@@ -1,5 +1,5 @@
-import { Movie } from "../models/Movie.js";
-import { MovieType } from "../models/MovieTypes.js";
+import Movie from "../models/Movie.js";
+import MovieType from "../models/MovieTypes.js";
 
 class MovieService {
   validateMovieData(movieData = {}, isUpdate = false) {
