@@ -1,7 +1,11 @@
+import MovieBanner from "~/components/layout/components/Movies/MovieBanner";
+import MovieTopicGrid from "~/components/layout/components/Movies/MovieTopicGrid";
+
 const Home = () => {
   return (
     <div>
-      <h1>Home Page</h1>
+      <MovieBanner />
+      <MovieTopicGrid />
     </div>
   );
 };
