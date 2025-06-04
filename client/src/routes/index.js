@@ -42,7 +42,7 @@ const PublicRoute = ({ children }) => {
 // Route paths constant
 export const ROUTES = {
     HOME: '/',
-    TOPIC: '/topic',
+    TOPIC: '/chu-de',
     MOVIE_DETAIL: '/movie/:id',
     LOGIN: '/login',
     REGISTER: '/register',
