@@ -85,4 +85,6 @@ movieSchema.plugin(mongooseDelete, {
   overrideMethods: "all",
 });
 
-export const Movie = mongoose.model("movies", movieSchema);
+const Movie = mongoose.model("Movie", movieSchema);
+
+export default Movie;

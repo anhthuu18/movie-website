@@ -6,6 +6,11 @@ mongoose.plugin(slug);
 
 const userSchema = new mongoose.Schema(
   {
+    userId: {
+      type: String,
+      required: true,
+      unique: true,
+    },
     username: {
       type: String,
       required: true,
@@ -28,6 +33,10 @@ const userSchema = new mongoose.Schema(
       type: String,
       enum: ["admin", "customer"],
       default: "customer",
+    },
+    isLocked: {
+      type: Boolean,
+      default: false,
     },
     slug: {
       type: String,
@@ -66,6 +75,20 @@ const userSchema = new mongoose.Schema(
   }
 );
 
+// Middleware để tự động tạo userId trước khi lưu
+userSchema.pre('save', async function(next) {
+  if (!this.userId) {
+    // Format: USER_YYYYMMDD_XXXX (XXXX là số ngẫu nhiên 4 chữ số)
+    const date = new Date();
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const random = Math.floor(1000 + Math.random() * 9000); // Số ngẫu nhiên 4 chữ số
+    this.userId = `USER_${year}${month}${day}_${random}`;
+  }
+  next();
+});
+
 // Plugin for soft delete - Sẽ tự động thêm các trường:
 // - deleted (boolean)
 // - deletedAt (Date)
@@ -78,20 +101,15 @@ userSchema.plugin(mongooseDelete, {
 userSchema.index({ email: 1 }, { unique: true });
 userSchema.index({ username: 1 }, { unique: true });
 userSchema.index({ slug: 1 }, { unique: true });
+userSchema.index({ userId: 1 }, { unique: true });
 
 // Create model
 const User = mongoose.model("User", userSchema);
-
-// Logging
-console.log("=== User Model Initialization ===");
-console.log("Current Date and Time (UTC):", "2025-05-06 08:47:13");
-console.log("Current User:", "anhthuu18");
 
 // Drop and recreate indexes
 User.collection
   .dropIndexes()
   .then(() => {
-    console.log("All indexes dropped successfully");
     console.log("Creating new indexes for:", Object.keys(userSchema.indexes()));
   })
   .catch((err) => {

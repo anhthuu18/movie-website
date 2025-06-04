@@ -1,79 +1,22 @@
-import bcryptjs from "bcryptjs";
-import { User } from "../models/UsersModel.js";
+import authService from "../services/authService.js";
 import { generateJWTandSetCookie } from "../utils/generateJWT.js";
-
-
 
 // [POST]/api/v1/auth/signup
 export async function signup(req, res) {
   try {
     const { email, username, password } = req.body;
-    // Validate required fields
-    if (!email || !username || !password) {
-      console.log("Missing required fields");
+    
+    // Validate data
+    const validationErrors = authService.validateSignupData({ email, username, password });
+    if (validationErrors.length > 0) {
       return res.status(400).json({
         success: false,
-        message: "All fields are required",
+        message: validationErrors[0],
       });
     }
 
-    // Validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid email format",
-      });
-    }
-
-    // Validate password length
-    if (password.length < 6) {
-      return res.status(400).json({
-        success: false,
-        message: "Password must be at least 6 characters long",
-      });
-    }
-
-    // Check existing user by email
-    const existingUserByEmail = await User.findOne({ email });
-    if (existingUserByEmail) {
-      return res.status(400).json({
-        success: false,
-        message: "Email already exists",
-      });
-    }
-
-    // Check existing user by username
-    const existingUserByUsername = await User.findOne({ username });
-    if (existingUserByUsername) {
-      return res.status(400).json({
-        success: false,
-        message: "Username already exists",
-      });
-    }
-
-    // Hash password
-    const salt = await bcryptjs.genSalt(10);
-    const hashedPassword = await bcryptjs.hash(password, salt);
-
-    // Select random profile picture
-    const PROFILE_PICS = [
-      "/uploads/users/avatar1.jpg",
-      "/uploads/users/avatar2.jpg",
-      "/uploads/users/avatar3.jpg",
-    ];
-    const image = PROFILE_PICS[Math.floor(Math.random() * PROFILE_PICS.length)];
-
-    // Create new user
-    const newUser = new User({
-      email,
-      username,
-      password: hashedPassword,
-      image,
-    });
-
-    // Save user to database
-    await newUser.save();
+    // Create user using service
+    const newUser = await authService.signup({ email, username, password });
 
     // Generate JWT and set cookie
     generateJWTandSetCookie(newUser._id, res);
@@ -99,7 +42,7 @@ export async function signup(req, res) {
     console.error("Error in signup:", error);
     res.status(500).json({
       success: false,
-      message: "Internal server error",
+      message: error.message || "Internal server error",
       error: process.env.NODE_ENV === "development" ? error.message : undefined,
     });
   }
@@ -110,35 +53,17 @@ export async function login(req, res) {
   try {
     const { email, password } = req.body;
 
-    // Validate required fields
-    if (!email || !password) {
+    // Validate data
+    const validationErrors = authService.validateLoginData({ email, password });
+    if (validationErrors.length > 0) {
       return res.status(400).json({
         success: false,
-        message: "All fields are required",
+        message: validationErrors[0],
       });
     }
 
-    // Find user by email
-    const user = await User.findOne({ email })
-      .select("+password") // Explicitly include password
-      .populate("favoriteMovies", "title posterUrl")
-      .populate("watchedMovies.movieId", "title posterUrl");
-
-    if (!user) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid email or password",
-      });
-    }
-
-    // Verify password
-    const isPasswordCorrect = await bcryptjs.compare(password, user.password);
-    if (!isPasswordCorrect) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid email or password",
-      });
-    }
+    // Login using service
+    const user = await authService.login(email, password);
 
     // Generate JWT and set cookie
     generateJWTandSetCookie(user._id, res);
@@ -160,13 +85,11 @@ export async function login(req, res) {
         slug: user.slug,
       },
     });
-    console.log("=== End Login Process ===");
   } catch (error) {
     console.error("Error in login:", error);
-    res.status(500).json({
+    res.status(400).json({
       success: false,
-      message: "Internal server error",
-      error: process.env.NODE_ENV === "development" ? error.message : undefined,
+      message: error.message || "Invalid email or password",
     });
   }
 }
@@ -182,7 +105,6 @@ export async function logout(req, res) {
       success: true,
       message: "Logged out successfully",
     });
-    console.log("=== End Logout Process ===");
   } catch (error) {
     console.error("Error in logout:", error);
     res.status(500).json({
@@ -193,19 +115,20 @@ export async function logout(req, res) {
   }
 }
 
-// [GET] /api/v1/auth/profile
+// [GET] /api/v1/auth/:slug/profile
 export async function getCurrentUser(req, res) {
   try {
-    const user = await User.findById(req.user._id)
-      .populate("favoriteMovies", "title posterUrl")
-      .populate("watchedMovies.movieId", "title posterUrl");
-
-    if (!user) {
-      return res.status(404).json({
+    const { slug } = req.params;
+    
+    // Verify that the logged-in user matches the requested profile
+    if (req.user.slug !== slug) {
+      return res.status(403).json({
         success: false,
-        message: "User not found",
+        message: "You can only view your own profile"
       });
     }
+
+    const user = await authService.getCurrentUser(req.user._id);
 
     res.status(200).json({
       success: true,
@@ -225,10 +148,97 @@ export async function getCurrentUser(req, res) {
     });
   } catch (error) {
     console.error("Error in getCurrentUser:", error);
-    res.status(500).json({
+    res.status(404).json({
       success: false,
-      message: "Internal server error",
-      error: process.env.NODE_ENV === "development" ? error.message : undefined,
+      message: error.message || "User not found",
+    });
+  }
+}
+
+// [PUT] /api/v1/auth/:slug/profile/update
+export async function updateProfile(req, res) {
+  try {
+    const { slug } = req.params;
+    
+    // Verify that the logged-in user matches the requested profile
+    if (req.user.slug !== slug) {
+      return res.status(403).json({
+        success: false,
+        message: "You can only update your own profile"
+      });
+    }
+
+    // Validate update data
+    const validationErrors = authService.validateProfileData(req.body);
+    if (validationErrors.length > 0) {
+      return res.status(400).json({
+        success: false,
+        message: validationErrors[0],
+      });
+    }
+
+    // Update profile using service
+    const updatedUser = await authService.updateProfile(req.user._id, req.body);
+
+    // Send success response
+    res.status(200).json({
+      success: true,
+      message: "Profile updated successfully",
+      user: {
+        _id: updatedUser._id,
+        username: updatedUser.username,
+        email: updatedUser.email,
+        image: updatedUser.image,
+        role: updatedUser.role,
+        searchHistory: updatedUser.searchHistory,
+        favoriteMovies: updatedUser.favoriteMovies,
+        watchedMovies: updatedUser.watchedMovies,
+        createdAt: updatedUser.createdAt,
+        updatedAt: updatedUser.updatedAt,
+        slug: updatedUser.slug,
+      },
+    });
+  } catch (error) {
+    console.error("Error in updateProfile:", error);
+    res.status(400).json({
+      success: false,
+      message: error.message || "Error updating profile",
+    });
+  }
+}
+
+// [PATCH] /api/v1/auth/user/change-password
+export async function changePassword(req, res) {
+  try {
+    const { currentPassword, newPassword } = req.body;
+
+    // Validate password data
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "Both current password and new password are required"
+      });
+    }
+
+    if (typeof newPassword !== 'string' || newPassword.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: "New password must be at least 6 characters long"
+      });
+    }
+
+    // Change password using service
+    await authService.changePassword(req.user._id, currentPassword, newPassword);
+
+    res.status(200).json({
+      success: true,
+      message: "Password changed successfully"
+    });
+  } catch (error) {
+    console.error("Error in changePassword:", error);
+    res.status(400).json({
+      success: false,
+      message: error.message || "Error changing password"
     });
   }
 }
